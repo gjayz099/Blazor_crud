@@ -1,0 +1,62 @@
+﻿@page "/edit-game"
+@page "/edit-game/{Id:int}"
+@inject NavigationManager NavigationManager
+@inject IGameService GameService
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+@if(Id is null)
+{
+    <PageTitle>Add A new Game</PageTitle>
+    <h3>Add new Game</h3>
+}
+else
+{
+    <PageTitle>Edit @currentGame.Title</PageTitle>
+    <h3>Edit @currentGame.Title</h3>
+}
+
+
+<EditForm Model="currentGame" OnSubmit="HandleSubmit">
+    <div>
+        <label for="title">Title</label>
+        <input type="text" id="title" @bind-value="currentGame.Title" class=" form-check">
+    </div>
+    <div>
+        <label for="Developer">Developer</label>
+        <input type="text" id="developer" @bind-value="currentGame.Developer" class=" form-check">
+    </div>
+    <button type="submit" class=" btn btn-primary">Save</button>
+</EditForm>
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    public Game currentGame { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Id is not null)
+        {
+            var game = await GameService.GetIDGame((int)Id);
+            if(game is not null)
+            currentGame = game;
+        }
+    }
+
+    public async Task HandleSubmit()
+    {
+        if(Id is not null)
+        {
+           ///updete
+            await GameService.UpdateGame(currentGame, (int) Id);
+            NavigationManager.NavigateTo("/game");
+        }
+        else
+        {
+            ///add
+            await GameService.AddGame(currentGame);
+            NavigationManager.NavigateTo("/game");
+        }
+    }
+}

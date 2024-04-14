@@ -1,0 +1,78 @@
+﻿@page "/game"
+@inject IGameService GameService
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+<PageTitle>Game</PageTitle>
+
+<div class="containet-table container m-auto pt-8">
+
+    <h1 class="text-center">GameList</h1>
+
+   @if(games.Count == 0)
+   {
+    <div class="text-center mt-10">
+        <span>Loading......</span>
+    </div>
+   }
+   else
+   {
+    <button class="my-2 btn btn-primary" @onclick="(() => AddGame())"> Add Game</button>
+     <table class="table pt-10 m-auto">
+        <thead class="table-dark" >
+            <tr>
+            <th>Title</th>
+            <th>Developer</th>
+            <th></th>
+            <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var game in games)
+            {
+            <tr>
+                <td>@game.Title</td>
+                <td>@game.Developer</td>
+                <td><button class="btn btn-secondary" @onclick="@(() => EditGame(game.Id))">Edit</button></td>
+                <td><button  class="btn btn-danger" @onclick="@(() => DeleteGamess(game.Id))">Delete</button></td>
+
+            </tr>
+            }
+        </tbody>
+    </table>
+   }
+
+
+</div>
+
+
+
+
+@code {
+
+    List<Game> games = new List<Game>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        await Task.Delay(500);
+        games = await GameService.GetAllGame();
+    }
+
+    public void EditGame(int Id)
+    {
+        NavigationManager.NavigateTo($"/edit-game/{Id}");
+    }
+    public void AddGame()
+    {
+        NavigationManager.NavigateTo("/edit-game");
+    }
+
+    public async Task DeleteGamess(int id)
+    {
+        await GameService.DeleteGame(id);
+        games = await GameService.GetAllGame();
+
+    }
+}
+  
